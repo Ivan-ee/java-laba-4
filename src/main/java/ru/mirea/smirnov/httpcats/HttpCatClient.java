@@ -13,7 +13,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 public class HttpCatClient {
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws InterruptedException {
         File dir = new File("cats");
 
         if (!dir.exists()) {
@@ -35,7 +35,7 @@ public class HttpCatClient {
             System.out.println("Send request to https://http.cat/" + i);
 
             int finalI = i;
-            CompletableFuture ft = client.sendAsync(request, HttpResponse.BodyHandlers.ofByteArray())
+            CompletableFuture<Void> ft = client.sendAsync(request, HttpResponse.BodyHandlers.ofByteArray())
                     .thenApply(Function.identity())
                     .thenAccept(response -> saveToFile(response, finalI));
             Thread.sleep(10);
