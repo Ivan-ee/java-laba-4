@@ -25,12 +25,18 @@ public class StonksClient {
 
         StonksService stonksService = client.create(StonksService.class);
 
+        LocalDate birthDate = LocalDate.of(2003, 5, 2);
+
         Response<DailyCurs> response = stonksService
-                .getDailyCurs(LocalDate.of(2010, 10, 23)
+                .getDailyCurs(birthDate
                         .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))).execute();
 
-        DailyCurs dailyCurs = response.body();
+        if (!response.isSuccessful() || response.body() == null) {
+            System.out.println("Ошибка при получении данных с сервера.");
+            return;
+        }
 
+        DailyCurs dailyCurs = response.body();
         Optional<Valute> maxValute = dailyCurs.getValutes().stream()
                 .filter(valute -> !valute.getName().equals("СДР (специальные права заимствования)"))
                 .max(Comparator.comparingDouble(Valute::getValue));
@@ -41,10 +47,13 @@ public class StonksClient {
 
             Valute mv = maxValute.get();
 
-            databaseService.saveMaxValuteOfDate("смирновиа", mv, LocalDate.now());
+            databaseService.saveMaxValuteOfDate("смирновиа", mv, birthDate);
+            System.out.printf("Валюта сохранена %s", mv);
         }
 
-        Valute valute = databaseService.getValuteOfDate(LocalDate.now());
+        Valute myValute = databaseService.getValuteOfDate(birthDate);
+
+        System.out.printf("Получена валюта из бд %s", myValute);
     }
 
 }
